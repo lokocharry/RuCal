@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
@@ -39,10 +38,8 @@ import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.bonuspack.overlays.Polyline;
 import org.osmdroid.tileprovider.MapTileProviderBasic;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.util.ResourceProxyImpl;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.TilesOverlay;
@@ -302,6 +299,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                         double lon=(double)nodo.getJSONArray("coordinates").get(0);
                         GeoPoint gPt=new GeoPoint(lat, lon);
                         Marker marker=new Marker(map);
+                        marker.setInfoWindow(new CustomInfoWindow(map));
                         marker.setPosition(gPt);
                         marker.setTitle(jObj.getJSONArray(i).getString(2));
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
