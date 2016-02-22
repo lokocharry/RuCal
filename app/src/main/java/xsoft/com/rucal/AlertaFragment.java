@@ -95,11 +95,11 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
         map = (MapView) v.findViewById(R.id.map2);
         map.setClickable(true);
         map.setBuiltInZoomControls(true);
-        
+
         map.setScrollableAreaLimit(new BoundingBoxE6(5.4983000, -73.3851000, 5.5864000, -73.3176000));
         mapController = map.getController();
         mapController.setZoom(13);
-        map.setMinZoomLevel(13);
+        map.setMinZoomLevel(8);
         mapController.animateTo(new GeoPoint(5.552223, -73.356618));
 
         MapEventsOverlay evOverlay = new MapEventsOverlay(getActivity(), this);
