@@ -9,11 +9,8 @@ import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase;
  */
 public class HereTileSource extends OnlineTileSourceBase {
 
-    public HereTileSource(final String aName, final ResourceProxy.string aResourceId, final int aZoomMinLevel,
-                        final int aZoomMaxLevel, final int aTileSizePixels, final String aImageFilenameEnding,
-                        final String[] aBaseUrl) {
-        super(aName, aResourceId, aZoomMinLevel, aZoomMaxLevel, aTileSizePixels,
-                aImageFilenameEnding, aBaseUrl);
+    public HereTileSource(final String aName, int aResourceId, int aZoomMinLevel, int aZoomMaxLevel, String fileEnding, final String[] aBaseUrl) {
+        super(aName, aResourceId, aZoomMinLevel, aZoomMaxLevel, fileEnding, aBaseUrl);
     }
 
     @Override

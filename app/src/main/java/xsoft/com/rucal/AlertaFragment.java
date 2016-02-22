@@ -43,6 +43,7 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.TilesOverlay;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.BufferedReader;
@@ -55,7 +56,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import HereMaps.HereTileSource;
-import bing.BingMapTileSource;
 import common.Commons;
 
 /**
@@ -95,7 +95,7 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
         map = (MapView) v.findViewById(R.id.map2);
         map.setClickable(true);
         map.setBuiltInZoomControls(true);
-        map.setMultiTouchControls(true);
+        
         map.setScrollableAreaLimit(new BoundingBoxE6(5.4983000, -73.3851000, 5.5864000, -73.3176000));
         mapController = map.getController();
         mapController.setZoom(13);
@@ -113,7 +113,7 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
 
         String[] myStringArray = {"https://1.aerial.maps.cit.api.here.com/maptile/2.1/maptile/newest/hybrid.day/"};
         final MapTileProviderBasic tileProvider = new MapTileProviderBasic(getActivity().getApplicationContext());
-        final ITileSource tileSource = new HereTileSource("HereMaps", null, 1, 20, 256, ".png", myStringArray);
+        final ITileSource tileSource = new HereTileSource("HereMaps", 1, 20, 256, ".png", myStringArray);
         tileProvider.setTileSource(tileSource);
         final TilesOverlay tilesOverlay = new TilesOverlay(tileProvider, this.getActivity().getBaseContext());
         tilesOverlay.setLoadingBackgroundColor(Color.TRANSPARENT);
@@ -129,10 +129,16 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
          //   e.printStackTrace();
        // }
 
+        RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(context, map);
+        mRotationGestureOverlay.setEnabled(true);
+        map.setMultiTouchControls(true);
+        map.getOverlays().add(mRotationGestureOverlay);
+
         MinimapOverlay miniMapOverlay = new MinimapOverlay(getActivity(), map.getTileRequestCompleteHandler());
         miniMapOverlay.setZoomDifference(5);
         miniMapOverlay.setHeight(200);
         miniMapOverlay.setWidth(200);
+        miniMapOverlay.setTileSource(tileSource);
         map.getOverlays().add(miniMapOverlay);
 
         lugar=new Marker(map);
