@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:onClick="calcularRuta"
+    android:id="@+id/maincontent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="78dp"
+        android:layout_gravity="center_horizontal">
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtOrigen"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/btnOrigen"
+            android:layout_toStartOf="@+id/btnOrigen"
+            android:hint="Origen"
+            android:editable="false"
+            android:inputType="none"
+            android:layout_above="@+id/txtDestino"
+            android:enabled="false" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnOrigen"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_my_location_black_36dp"
+            android:layout_above="@+id/txtDestino" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnDestino"
+            android:src="@drawable/ic_my_location_black_36dp"
+            android:layout_toRightOf="@+id/txtOrigen"
+            android:layout_toEndOf="@+id/txtOrigen"
+            android:layout_alignBottom="@+id/txtDestino"
+            android:layout_below="@+id/txtOrigen" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtDestino"
+            android:hint="Destino"
+            android:inputType="none"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/btnDestino"
+            android:layout_toStartOf="@+id/btnDestino"
+            android:layout_alignParentBottom="true"
+            android:editable="false"
+            android:enabled="false"/>
+
+    </RelativeLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Calcular Ruta"
+        android:id="@+id/btnCalcular"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="center_horizontal" />
+
+    <org.osmdroid.views.MapView android:id="@+id/map"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+    </org.osmdroid.views.MapView>
+
+</LinearLayout>
