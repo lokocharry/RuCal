@@ -10,6 +10,7 @@ import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -96,7 +97,6 @@ public class MainActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        registerGCM();
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
         mDrawerList = (ListView)findViewById(R.id.navList);
@@ -111,7 +111,7 @@ public class MainActivity extends ActionBarActivity {
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.content_frame, rutaFragment);
         ft.commit();
-
+        registerGCM();
     }
 
     private void registerGCM() {
@@ -120,6 +120,9 @@ public class MainActivity extends ActionBarActivity {
             protected String doInBackground(Void... params) {
                 try {
                     String regId = GCMPreference.getRegistrationId(getApplicationContext());
+                    if (gcm == null) {
+                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+                    }
                     if(regId.equals("")){
                         regId = gcm.register(Commons.GCM_SENDER);
                         GCMPreference.setRegistrationId(MainActivity.this.getApplicationContext(), regId);
