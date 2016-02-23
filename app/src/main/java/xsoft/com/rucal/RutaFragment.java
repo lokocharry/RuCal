@@ -299,7 +299,8 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                         double lon=(double)nodo.getJSONArray("coordinates").get(0);
                         GeoPoint gPt=new GeoPoint(lat, lon);
                         Marker marker=new Marker(map);
-                        marker.setInfoWindow(new CustomInfoWindow(map));
+                        int id=jObj.getJSONArray(i).getInt(3);
+                        marker.setInfoWindow(new CustomInfoWindow(map, id));
                         marker.setPosition(gPt);
                         marker.setTitle(jObj.getJSONArray(i).getString(2));
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
