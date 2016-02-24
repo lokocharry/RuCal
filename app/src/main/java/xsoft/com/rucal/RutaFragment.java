@@ -76,6 +76,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
     private ImageButton btnOrigen;
     private ImageButton btnDestino;
     private Button btnCalcular;
+    private Button btnAR;
 
     private Marker origen;
     private Marker destino;
@@ -137,10 +138,12 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         btnOrigen=(ImageButton)v.findViewById(R.id.btnOrigen);
         btnDestino=(ImageButton)v.findViewById(R.id.btnDestino);
         btnCalcular=(Button)v.findViewById(R.id.btnCalcular);
+        btnAR=(Button)v.findViewById(R.id.AR);
 
         btnOrigen.setOnClickListener(this);
         btnDestino.setOnClickListener(this);
         btnCalcular.setOnClickListener(this);
+        btnAR.setOnClickListener(this);
 
         map = (MapView) v.findViewById(R.id.map);
         map.setClickable(true);
@@ -711,11 +714,14 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
             case R.id.btnOrigen:
                 setOrigen();
                 break;
+            case R.id.AR:
+                verEnAR();
+                break;
         }
     }
 
     private void verEnAR(){
-        Intent intent = new Intent(getActivity().getApplicationContext(), ARView.class);
+        Intent intent = new Intent(getActivity(), ARView.class);
         intent.putExtra("lat", destino.getPosition().getLatitude());
         intent.putExtra("lon", destino.getPosition().getLongitude());
         intent.putExtra("locLat", obtenerMiUbicacion().getLatitude());

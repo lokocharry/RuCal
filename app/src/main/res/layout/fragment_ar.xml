@@ -9,4 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|top"
+        android:background="@drawable/radar_bg_small" >
+
+        <com.beyondar.android.plugin.radar.RadarView
+            android:id="@+id/radarView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/radar_north_small" />
+    </FrameLayout>
+
 </FrameLayout>
