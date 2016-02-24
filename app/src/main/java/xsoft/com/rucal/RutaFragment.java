@@ -45,8 +45,6 @@ import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MinimapOverlay;
-import org.osmdroid.views.overlay.Overlay;
-import org.osmdroid.views.overlay.TilesOverlay;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -147,6 +145,9 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         map.setClickable(true);
 
         poiMarkers = new RadiusMarkerClusterer(getActivity().getApplicationContext());
+        Drawable clusterIconD = getResources().getDrawable(R.drawable.cluster_marker);
+        Bitmap clusterIcon = ((BitmapDrawable) clusterIconD).getBitmap();
+        poiMarkers.setIcon(clusterIcon);
         poiMarkers.getTextPaint().setTextSize(12.0f);
         poiMarkers.mAnchorV = Marker.ANCHOR_BOTTOM;
         poiMarkers.mTextAnchorU = 0.70f;
@@ -442,7 +443,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                         String subDes="";
                         subDes+="Precio Gasolina: $"+jObj.getJSONArray(i).getString(2)+"\n";
                         subDes+="Precio Gas: $"+jObj.getJSONArray(i).getString(3)+"\n";
-                        subDes+="Precio ACPM: $"+jObj.getJSONArray(i).getString(4);
+                        subDes += "Precio ACPM: $"+jObj.getJSONArray(i).getString(4);
                         marker.setSubDescription(subDes);
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                         marker.setIcon(getResources().getDrawable(R.drawable.ic_local_gas_station_black_24dp));
