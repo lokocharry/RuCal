@@ -3,6 +3,7 @@ package xsoft.com.rucal;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -711,5 +712,14 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                 setOrigen();
                 break;
         }
+    }
+
+    private void verEnAR(){
+        Intent intent = new Intent(getActivity().getApplicationContext(), ARView.class);
+        intent.putExtra("lat", destino.getPosition().getLatitude());
+        intent.putExtra("lon", destino.getPosition().getLongitude());
+        intent.putExtra("locLat", obtenerMiUbicacion().getLatitude());
+        intent.putExtra("locLon", obtenerMiUbicacion().getLatitude());
+        startActivity(intent);
     }
 }

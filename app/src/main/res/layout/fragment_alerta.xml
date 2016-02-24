@@ -69,5 +69,4 @@
         android:id="@+id/spinnerTipo"
         android:entries="@array/tipos"/>
 
-
 </LinearLayout>
