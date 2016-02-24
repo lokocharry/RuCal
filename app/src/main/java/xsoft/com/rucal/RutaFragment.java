@@ -12,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer;
 import org.osmdroid.bonuspack.overlays.MapEventsOverlay;
 import org.osmdroid.bonuspack.overlays.MapEventsReceiver;
 import org.osmdroid.bonuspack.overlays.Marker;
@@ -42,6 +45,7 @@ import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MinimapOverlay;
+import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.TilesOverlay;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
@@ -63,6 +67,8 @@ import common.Commons;
 public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.OnMarkerClickListener, Marker.OnMarkerDragListener, View.OnClickListener {
 
     private MapView map;
+    private MinimapOverlay miniMapOverlay;
+    private RadiusMarkerClusterer poiMarkers;
     private IMapController mapController;
     private MyLocationNewOverlay miUbicacion;
     private EditText txtOrigen;
@@ -75,7 +81,50 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
     private Marker origen;
     private Marker destino;
 
+    private ITileSource tileSourceRaster;
+    private ITileSource tileSourceVector;
+
     private View v;
+
+    private int actualmapType=1;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_ruta, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.action_cambiar_mapa_ruta){
+            changeMapSource();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void changeMapSource(){
+        switch (actualmapType){
+            case 1:
+                map.setTileSource(tileSourceVector);
+                miniMapOverlay.setTileSource(tileSourceVector);
+                map.invalidate();
+                actualmapType=2;
+                break;
+            case 2:
+                map.setTileSource(tileSourceRaster);
+                miniMapOverlay.setTileSource(tileSourceRaster);
+                map.invalidate();
+                actualmapType=1;
+                break;
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -97,13 +146,23 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         map = (MapView) v.findViewById(R.id.map);
         map.setClickable(true);
 
-        String[] myStringArray = {"https://1.aerial.maps.cit.api.here.com/maptile/2.1/maptile/newest/hybrid.day/"};
-        final MapTileProviderBasic tileProvider = new MapTileProviderBasic(getActivity().getApplicationContext());
-        final ITileSource tileSource = new HereTileSource("HereMaps", 1, 16, 256, ".png", myStringArray);
-        tileProvider.setTileSource(tileSource);
-        final TilesOverlay tilesOverlay = new TilesOverlay(tileProvider, this.getActivity().getBaseContext());
-        tilesOverlay.setLoadingBackgroundColor(Color.TRANSPARENT);
-        map.setTileSource(tileSource);
+        poiMarkers = new RadiusMarkerClusterer(getActivity().getApplicationContext());
+        poiMarkers.getTextPaint().setTextSize(12.0f);
+        poiMarkers.mAnchorV = Marker.ANCHOR_BOTTOM;
+        poiMarkers.mTextAnchorU = 0.70f;
+        poiMarkers.mTextAnchorV = 0.27f;
+        map.getOverlays().add(poiMarkers);
+
+        String[] vectorSource = {"https://1.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/normal.day/"};
+        final MapTileProviderBasic tileProviderVector = new MapTileProviderBasic(getActivity().getApplicationContext());
+        tileSourceVector = new HereTileSource("HereMapsRoads", 1, 16, 256, ".png", vectorSource);
+        tileProviderVector.setTileSource(tileSourceVector);
+
+        String[] rasterSource = {"https://1.aerial.maps.cit.api.here.com/maptile/2.1/maptile/newest/hybrid.day/"};
+        final MapTileProviderBasic tileProviderRaster = new MapTileProviderBasic(getActivity().getApplicationContext());
+        tileSourceRaster = new HereTileSource("HereMapsAerial", 1, 16, 256, ".png", rasterSource);
+        tileProviderRaster.setTileSource(tileSourceRaster);
+        map.setTileSource(tileSourceRaster);
 
         //BingMapTileSource bing=null;
         //try{
@@ -136,12 +195,12 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         miUbicacion.setDrawAccuracyEnabled(true);
         map.getOverlays().add(miUbicacion);
 
-        MinimapOverlay miniMapOverlay = new MinimapOverlay(getActivity(), map.getTileRequestCompleteHandler());
+        miniMapOverlay = new MinimapOverlay(getActivity(), map.getTileRequestCompleteHandler());
         miniMapOverlay.setZoomDifference(5);
         //miniMapOverlay.setTileSource(bing);
         miniMapOverlay.setHeight(200);
         miniMapOverlay.setWidth(200);
-        miniMapOverlay.setTileSource(tileSource);
+        miniMapOverlay.setTileSource(tileSourceRaster);
         map.getOverlays().add(miniMapOverlay);
 
         origen=new Marker(map);
@@ -315,7 +374,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                                 marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.construccion), 90, 90, true)));
                                 break;
                         }
-                        map.getOverlays().add(marker);
+                       poiMarkers.add(marker);
                     }
                 } catch (JSONException e) {
                     Log.e("JSON Parser", "Error parsing data " + e.toString());
@@ -387,7 +446,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                         marker.setSubDescription(subDes);
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                         marker.setIcon(getResources().getDrawable(R.drawable.ic_local_gas_station_black_24dp));
-                        map.getOverlays().add(marker);
+                        poiMarkers.add(marker);
                     }
                 } catch (JSONException e) {
                     Log.e("JSON Parser", "Error parsing data " + e.toString());
