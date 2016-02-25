@@ -70,6 +70,7 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
     private ImageButton btnLugar;
     private Button btnEnviar;
     private EditText txtComentario;
+    private EditText txtDuracion;
     private Spinner spinerTipo;
 
     private Marker lugar;
@@ -83,6 +84,7 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
 
         txtLugar=(EditText)v.findViewById(R.id.txtLugar);
         txtComentario=(EditText)v.findViewById(R.id.txtComentario);
+        txtDuracion=(EditText)v.findViewById(R.id.txtDuracion);
         spinerTipo=(Spinner)v.findViewById(R.id.spinnerTipo);
 
         btnLugar=(ImageButton)v.findViewById(R.id.btnlugar);
@@ -226,6 +228,7 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
         pairs.add(new BasicNameValuePair("lat", ""+lugar.getPosition().getLatitude()));
         pairs.add(new BasicNameValuePair("lon", ""+lugar.getPosition().getLongitude()));
         pairs.add(new BasicNameValuePair("tipo", spinerTipo.getSelectedItem().toString()));
+        pairs.add(new BasicNameValuePair("duracion", txtDuracion.getText().toString()));
         pairs.add(new BasicNameValuePair("comentario", txtComentario.getText().toString()));
         try {
             post.setEntity(new UrlEncodedFormEntity(pairs));

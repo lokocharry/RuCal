@@ -25,6 +25,13 @@
             android:configChanges="orientation|screenSize" >
         </activity>
 
+        <activity android:name=".LoginActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme_AppCompat_Light" />
+        <activity android:name=".SignupActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme_AppCompat_Light" />
+
         <receiver
             android:name=".GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
