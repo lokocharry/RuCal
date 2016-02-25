@@ -1,5 +1,7 @@
 package xsoft.com.rucal;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -64,8 +66,11 @@ public class CustomInfoWindow extends MarkerInfoWindow {
         final HttpClient client=new DefaultHttpClient();
         final HttpPost post=new HttpPost(Commons.SERVER_IP+URL);
 
+        SharedPreferences pref = getView().getContext().getSharedPreferences("LoginRegPREF", Context.MODE_PRIVATE);
+        String email=pref.getString("email", "");
         List<NameValuePair> pairs=new ArrayList<>();
         pairs.add(new BasicNameValuePair("id", ""+idEvento));
+        pairs.add(new BasicNameValuePair("email", email));
         try {
             post.setEntity(new UrlEncodedFormEntity(pairs));
         } catch (UnsupportedEncodingException e) {

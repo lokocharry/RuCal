@@ -1,6 +1,9 @@
 package xsoft.com.rucal;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,8 +15,28 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import common.Commons;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
@@ -30,8 +53,18 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.inject(this);
 
-        _loginButton.setOnClickListener(new View.OnClickListener() {
+        SharedPreferences pref = getSharedPreferences("LoginRegPREF", Context.MODE_PRIVATE);
+        if(pref.getBoolean("loged_in", false)){
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        } //else {
+            //SharedPreferences.Editor ed = pref.edit();
+            //ed.putBoolean("loged_in", true);
+            //ed.commit();
+        //}
 
+        _loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
@@ -39,12 +72,11 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         _signupLink.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 // Start the Signup activity
                 Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
-                startActivityForResult(intent, REQUEST_SIGNUP);
+                startActivityForResult(intent, RESULT_OK);
             }
         });
     }
@@ -61,13 +93,81 @@ public class LoginActivity extends AppCompatActivity {
 
         final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
+        progressDialog.setMessage("Autenticando...");
         progressDialog.show();
 
-        String email = _emailText.getText().toString();
+        final String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        // TODO: Implement your own authentication logic here.
+        final HttpClient client=new DefaultHttpClient();
+        final HttpPost post=new HttpPost(Commons.SERVER_IP+"/ingresar/");
+
+        List<NameValuePair> pairs=new ArrayList<>();
+        pairs.add(new BasicNameValuePair("username", email));
+        pairs.add(new BasicNameValuePair("password", password));
+        try {
+            post.setEntity(new UrlEncodedFormEntity(pairs));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        new AsyncTask<Void, Void, String>(){
+
+            @Override
+            protected String doInBackground(Void... params) {
+                InputStream is=null;
+                String json="";
+                try {
+                    HttpResponse response=client.execute(post);
+                    HttpEntity httpEntity = response.getEntity();
+                    is = httpEntity.getContent();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                    StringBuilder sb = new StringBuilder();
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    is.close();
+                    json = sb.toString();
+                } catch (Exception e) {
+                    Log.e("Buffer Error", "Error converting result " + e.toString());
+                }
+
+                return json;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                try {
+                    JSONObject jObj = new JSONObject(s);
+                    int result=Integer.parseInt(jObj.get("mensage").toString());
+                    switch (result){
+                        case 200:
+                            SharedPreferences pref = getSharedPreferences("LoginRegPREF", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor ed = pref.edit();
+                            ed.putBoolean("loged_in", true);
+                            ed.putString("email", email);
+                            ed.commit();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                            break;
+                        case 600:
+                            Toast.makeText(getApplicationContext(), "La cuenta se encuentra desactivada", Toast.LENGTH_SHORT).show();
+                            break;
+                        case 700:
+                            Toast.makeText(getApplicationContext(), "Email/Contraseña invalidos", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                } catch (JSONException e) {
+                    Log.e("JSON Parser", "Error parsing data " + e.toString());
+                }
+            }
+        }.execute();
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
@@ -79,7 +179,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }, 3000);
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

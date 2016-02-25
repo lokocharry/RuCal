@@ -33,7 +33,6 @@ public class MainActivity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private String mActivityTitle;
-    private GoogleCloudMessaging gcm;
 
     protected String regId;
 
@@ -110,30 +109,6 @@ public class MainActivity extends ActionBarActivity {
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.content_frame, rutaFragment);
         ft.commit();
-        registerGCM();
-    }
-
-    private void registerGCM() {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                try {
-                    String regId = GCMPreference.getRegistrationId(getApplicationContext());
-                    if (gcm == null) {
-                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-                    }
-                    if(regId.equals("")){
-                        regId = gcm.register(Commons.GCM_SENDER);
-                        GCMPreference.setRegistrationId(MainActivity.this.getApplicationContext(), regId);
-                        String deviceID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-                        Device.register(deviceID, regId);
-                    }
-                    return null;
-                } catch (Exception e) {
-                    return null;
-                }
-            }
-        }.execute();
     }
 
     @Override
