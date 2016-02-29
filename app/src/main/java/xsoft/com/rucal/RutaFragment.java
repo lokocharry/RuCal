@@ -21,6 +21,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -60,6 +62,8 @@ import java.util.List;
 import HereMaps.HereTileSource;
 import common.Commons;
 
+import static com.google.android.gms.internal.zzhu.runOnUiThread;
+
 /**
  * Created by Usuario on 02/02/2016.
  */
@@ -77,6 +81,8 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
     private ImageButton btnDestino;
     private Button btnCalcular;
     private Button btnAR;
+    private LinearLayout panelDireciones;
+    private ListView direcciones;
 
     private Marker origen;
     private Marker destino;
@@ -147,6 +153,9 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
 
         map = (MapView) v.findViewById(R.id.map);
         map.setClickable(true);
+
+        panelDireciones=(LinearLayout) v.findViewById(R.id.panelDirecciones);
+        direcciones=(ListView) v.findViewById(R.id.direcciones);
 
         poiMarkers = new RadiusMarkerClusterer(getActivity().getApplicationContext());
         Drawable clusterIconD = getResources().getDrawable(R.drawable.cluster_marker);
@@ -628,6 +637,75 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
     public void obtenerRutas(){
         calcularRuta();
         calcularRutaAlterna();
+        obtenerDirecciones();
+    }
+
+    public void obtenerDirecciones(){
+        new AsyncTask<Void, Void, Void>() {
+            InputStream is = null;
+            String json = "";
+            JSONArray jObj = null;
+            @Override
+            protected Void doInBackground(Void... params) {
+                DefaultHttpClient httpClient = new DefaultHttpClient();
+                String[] orilatlon=origen.getPosition().toInvertedDoubleString().split(",");
+                String[] deslatlon=destino.getPosition().toInvertedDoubleString().split(",");
+
+                List<NameValuePair> parametros = new LinkedList<NameValuePair>();
+                parametros.add(new BasicNameValuePair("orilat", orilatlon[0]));
+                parametros.add(new BasicNameValuePair("orilon", orilatlon[1]));
+                parametros.add(new BasicNameValuePair("deslat", deslatlon[0]));
+                parametros.add(new BasicNameValuePair("deslon", deslatlon[1]));
+
+                HttpGet get=new HttpGet(Commons.SERVER_IP+"/obtenerDirecciones?"+parametrosAUrl(parametros));
+                Log.e("URL", Commons.SERVER_IP+"/rutas?"+parametrosAUrl(parametros));
+                HttpResponse httpResponse = null;
+                try {
+                    httpResponse = httpClient.execute(get);
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    is = httpEntity.getContent();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+                    StringBuilder sb = new StringBuilder();
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    is.close();
+                    json = sb.toString();
+                    //Log.e("Mensage", json);
+                } catch (Exception e) {
+                    Log.e("Buffer Error", "Error converting result " + e.toString());
+                }
+                try {
+                    JSONObject dir=new JSONObject(json);
+                    Log.i("Direcciones", direcciones.toString());
+                    ArrayList<NavItem> instrucciones = new ArrayList<NavItem>();
+                    for (int j=0; j<dir.length(); j++){
+                        String texto=dir.getString(String.valueOf(j));
+                        Log.i("Direcciones", texto);
+                        instrucciones.add(new NavItem(""+j, texto, R.drawable.ic_more_black_24dp));
+                    }
+                    DrawerListAdapter adapter = new DrawerListAdapter(getActivity().getApplicationContext(), instrucciones);
+                    actualizarDirecciones(adapter);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    public void  actualizarDirecciones(final DrawerListAdapter adapter){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                direcciones.setAdapter(adapter);
+            }
+        });
     }
 
     private void crearMarker(Marker marker, GeoPoint geoPoint, String titulo, Drawable icono){
