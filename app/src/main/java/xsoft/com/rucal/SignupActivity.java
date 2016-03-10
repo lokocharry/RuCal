@@ -109,7 +109,7 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("Entre 4 y 1o caracteres alfanumericos");
+            _passwordText.setError("Entre 4 y 10 caracteres alfanumericos");
             valid = false;
         } else {
             _passwordText.setError(null);

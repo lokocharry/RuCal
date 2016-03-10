@@ -34,6 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Line 2"
+        android:textColor="@color/material_blue_grey_800"
         android:layout_toRightOf="@+id/icon"
         android:layout_below="@+id/title"
         android:layout_alignParentRight="true"

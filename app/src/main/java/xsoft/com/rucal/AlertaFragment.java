@@ -2,6 +2,7 @@ package xsoft.com.rucal;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -223,8 +224,11 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
     private void enviarAlerta(){
         final HttpClient client=new DefaultHttpClient();
         final HttpPost post=new HttpPost(Commons.SERVER_IP+"/crearAlerta/");
+        SharedPreferences pref = getActivity().getSharedPreferences("LoginRegPREF", Context.MODE_PRIVATE);
 
         List<NameValuePair> pairs=new ArrayList<>();
+
+        pairs.add(new BasicNameValuePair("email", pref.getString("email", "")));
         pairs.add(new BasicNameValuePair("lat", ""+lugar.getPosition().getLatitude()));
         pairs.add(new BasicNameValuePair("lon", ""+lugar.getPosition().getLongitude()));
         pairs.add(new BasicNameValuePair("tipo", spinerTipo.getSelectedItem().toString()));
