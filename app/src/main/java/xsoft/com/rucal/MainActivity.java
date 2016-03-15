@@ -2,6 +2,7 @@ package xsoft.com.rucal;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +35,7 @@ public class MainActivity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private String mActivityTitle;
+    private RutaFragment rutaFragment=new RutaFragment();
 
     protected String regId;
 
@@ -51,7 +54,6 @@ public class MainActivity extends ActionBarActivity {
                 FragmentTransaction ft = fragmentManager.beginTransaction();
                 switch (position){
                     case 0:
-                        RutaFragment rutaFragment=new RutaFragment();
                         ft.replace(R.id.content_frame, rutaFragment);
                         ft.commit();
                         getSupportActionBar().setTitle("Rutas");
@@ -104,11 +106,12 @@ public class MainActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        RutaFragment rutaFragment=new RutaFragment();
+        rutaFragment=new RutaFragment();
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.content_frame, rutaFragment);
         ft.commit();
+
     }
 
     @Override
@@ -143,4 +146,12 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onNewIntent(Intent intent) {
+        double lat=intent.getDoubleExtra("lat", 0.0);
+        double lon=intent.getDoubleExtra("lon", 0.0);
+        Log.e("Latitud", ""+lat );
+        Log.e("Longitud", ""+lon);
+        rutaFragment.animateToEvent(lat, lon);
+    }
 }

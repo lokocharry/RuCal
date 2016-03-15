@@ -14,7 +14,7 @@
 
         <EditText
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="39dp"
             android:id="@+id/txtLugar"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
@@ -28,7 +28,7 @@
 
         <ImageButton
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="39dp"
             android:text="Mi ubicación"
             android:src="@drawable/ic_my_location_black_36dp"
             android:id="@+id/btnlugar"
@@ -41,7 +41,7 @@
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="45dp"
         android:text="Enviar"
         android:id="@+id/btnEnviar"
         android:layout_alignParentBottom="true"
@@ -51,7 +51,7 @@
 
     <org.osmdroid.views.MapView android:id="@+id/map2"
         android:layout_width="fill_parent"
-        android:layout_height="250dp" >
+        android:layout_height="310dp" >
     </org.osmdroid.views.MapView>
 
         <EditText
@@ -72,7 +72,7 @@
 
     <Spinner
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:id="@+id/spinnerTipo"
         android:entries="@array/tipos"/>
 

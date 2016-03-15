@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -805,5 +806,10 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         intent.putExtra("locLat", obtenerMiUbicacion().getLatitude());
         intent.putExtra("locLon", obtenerMiUbicacion().getLatitude());
         startActivity(intent);
+
+    }
+
+    public void animateToEvent(double lat, double lon){
+        map.getController().animateTo(new GeoPoint(lat, lon));
     }
 }
