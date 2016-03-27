@@ -18,9 +18,6 @@ import com.beyondar.android.world.World;
 
 import java.util.ArrayList;
 
-/**
- * Created by INGENIERIA on 24/02/2016.
- */
 public class ARView extends ActionBarActivity implements OnClickBeyondarObjectListener {
 
     private BeyondarFragmentSupport mBeyondarFragment;

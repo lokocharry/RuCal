@@ -32,8 +32,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,9 +69,6 @@ import common.Commons;
 
 import static com.google.android.gms.internal.zzhu.runOnUiThread;
 
-/**
- * Created by Usuario on 02/02/2016.
- */
 public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.OnMarkerClickListener, Marker.OnMarkerDragListener, View.OnClickListener {
 
     private MapView map;
@@ -84,6 +85,9 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
     private Button btnAR;
     private LinearLayout panelDireciones;
     private ListView direcciones;
+
+    private Polyline ruta;
+    private Polyline rutaAlt;
 
     private Marker origen;
     private Marker destino;
@@ -156,6 +160,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         map.setClickable(true);
 
         panelDireciones=(LinearLayout) v.findViewById(R.id.panelDirecciones);
+
         direcciones=(ListView) v.findViewById(R.id.direcciones);
 
         poiMarkers = new RadiusMarkerClusterer(getActivity().getApplicationContext());
@@ -179,16 +184,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         tileProviderRaster.setTileSource(tileSourceRaster);
         map.setTileSource(tileSourceRaster);
 
-        //BingMapTileSource bing=null;
-        //try{
-            //bing = new BingMapTileSource("en");
-            //bing.setStyle(BingMapTileSource.IMAGERYSET_ROAD);
-            //map.setTileSource(bing);
-        //}
-        //catch(Exception e){
-            //e.printStackTrace();
-        //}
-
         RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(context, map);
         mRotationGestureOverlay.setEnabled(true);
         map.setMultiTouchControls(true);
@@ -198,6 +193,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         map.setScrollableAreaLimit(new BoundingBoxE6(5.4983000, -73.3851000, 5.5864000, -73.3176000));
         mapController = map.getController();
         mapController.setZoom(13);
+        map.setMaxZoomLevel(18);
         map.setMinZoomLevel(8);
         mapController.animateTo(new GeoPoint(5.552223, -73.356618));
 
@@ -212,7 +208,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
 
         miniMapOverlay = new MinimapOverlay(getActivity(), map.getTileRequestCompleteHandler());
         miniMapOverlay.setZoomDifference(5);
-        //miniMapOverlay.setTileSource(bing);
         miniMapOverlay.setHeight(200);
         miniMapOverlay.setWidth(200);
         miniMapOverlay.setTileSource(tileSourceRaster);
@@ -241,7 +236,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
     public void setOrigen(){
         GeoPoint ubicacion=obtenerMiUbicacion();
         if(ubicacion!=null) {
-            String [] latlon=ubicacion.toInvertedDoubleString().split(",");
             origen.setPosition(ubicacion);
             map.invalidate();
             obtenerNombrePunto(origen, txtOrigen);
@@ -255,7 +249,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
     public void setDestino(){
         GeoPoint ubicacion=obtenerMiUbicacion();
         if(ubicacion!=null) {
-            String [] latlon=ubicacion.toInvertedDoubleString().split(",");
             destino.setPosition(ubicacion);
             map.invalidate();
             obtenerNombrePunto(destino, txtDestino);
@@ -287,7 +280,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                 parametros.add(new BasicNameValuePair("lon", latlon[1]));
 
                 HttpGet get=new HttpGet(Commons.SERVER_IP+"/nombreRuta?"+parametrosAUrl(parametros));
-                //Log.e("URL", Commons.SERVER_IP+"/nombreRuta?"+parametrosAUrl(parametros));
                 HttpResponse httpResponse = null;
                 try {
                     httpResponse = httpClient.execute(get);
@@ -305,14 +297,12 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     }
                     is.close();
                     json = sb.toString();
-                    //Log.e("Mensage", json);
                 } catch (Exception e) {
                     Log.e("Buffer Error", "Error converting result " + e.toString());
                 }
                 try {
                     jObj = new JSONArray(json);
                     nombre[0] =(String)jObj.toString().split(",")[1];
-                    Log.i("NombreRuta", nombre[0]);
                 } catch (JSONException e) {
                     Log.e("JSON Parser", "Error parsing data " + e.toString());
                 }
@@ -341,14 +331,20 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
 
             @Override
             protected Void doInBackground(Void... params) {
-                DefaultHttpClient httpClient = new DefaultHttpClient();
-
                 HttpGet get=new HttpGet(Commons.SERVER_IP+"/alertas");
+                HttpParams httpParameters = new BasicHttpParams();
                 HttpResponse httpResponse = null;
+                int timeoutConnection = 4000;
+                HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+                int timeoutSocket = 6000;
+                HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+                DefaultHttpClient httpClient = new DefaultHttpClient(httpParameters);
                 try {
                     httpResponse = httpClient.execute(get);
                     HttpEntity httpEntity = httpResponse.getEntity();
                     is = httpEntity.getContent();
+                } catch (ConnectTimeoutException e) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Alertas)", Toast.LENGTH_LONG).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -420,14 +416,20 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
 
             @Override
             protected Void doInBackground(Void... params) {
-                DefaultHttpClient httpClient = new DefaultHttpClient();
-
                 HttpGet get=new HttpGet(Commons.SERVER_IP+"/estaciones");
+                HttpParams httpParameters = new BasicHttpParams();
                 HttpResponse httpResponse = null;
+                int timeoutConnection = 4000;
+                HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+                int timeoutSocket = 6000;
+                HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+                DefaultHttpClient httpClient = new DefaultHttpClient(httpParameters);
                 try {
                     httpResponse = httpClient.execute(get);
                     HttpEntity httpEntity = httpResponse.getEntity();
                     is = httpEntity.getContent();
+                } catch (ConnectTimeoutException e) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado", Toast.LENGTH_LONG).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -478,8 +480,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         map.invalidate();
     }
 
-    private Polyline ruta;
-
     public void calcularRuta(){
         if(ruta!=null){
             map.getOverlays().remove(ruta);
@@ -511,6 +511,8 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     httpResponse = httpClient.execute(get);
                     HttpEntity httpEntity = httpResponse.getEntity();
                     is = httpEntity.getContent();
+                } catch (ConnectTimeoutException e) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado", Toast.LENGTH_LONG).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -555,8 +557,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
             }
         }.execute();
     }
-
-    private Polyline rutaAlt;
 
     public void calcularRutaAlterna(){
         if(rutaAlt!=null){
@@ -637,7 +637,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
 
     public void obtenerRutas(){
         calcularRuta();
-        calcularRutaAlterna();
+        //calcularRutaAlterna();
         obtenerDirecciones();
     }
 
@@ -688,7 +688,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     for (int j=0; j<dir.length(); j++){
                         String texto=dir.getString(String.valueOf(j));
                         Log.i("Direcciones", texto);
-                        instrucciones.add(new NavItem(""+j, texto, R.drawable.ic_more_black_24dp));
+                        instrucciones.add(new NavItem(""+(j+1), texto, R.drawable.ic_more_black_24dp));
                     }
                     DrawerListAdapter adapter = new DrawerListAdapter(getActivity().getApplicationContext(), instrucciones);
                     actualizarDirecciones(adapter);
@@ -806,10 +806,9 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         intent.putExtra("locLat", obtenerMiUbicacion().getLatitude());
         intent.putExtra("locLon", obtenerMiUbicacion().getLatitude());
         startActivity(intent);
-
     }
 
     public void animateToEvent(double lat, double lon){
-        map.getController().animateTo(new GeoPoint(lat, lon));
+        mapController.animateTo(new GeoPoint(lat, lon));
     }
 }

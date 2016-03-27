@@ -1,5 +1,6 @@
 package xsoft.com.rucal;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -31,7 +33,6 @@ import common.Commons;
 public class MainActivity extends ActionBarActivity {
 
     private ListView mDrawerList;
-    private ArrayAdapter<String> mAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private String mActivityTitle;
@@ -65,7 +66,7 @@ public class MainActivity extends ActionBarActivity {
                         getSupportActionBar().setTitle("Alertas");
                         break;
                     case 2:
-                        Toast.makeText(getApplicationContext(), "nou nou nou tambien", Toast.LENGTH_SHORT).show();
+                        showAbout();
                         break;
                 }
 
@@ -111,7 +112,6 @@ public class MainActivity extends ActionBarActivity {
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.content_frame, rutaFragment);
         ft.commit();
-
     }
 
     @Override
@@ -144,6 +144,31 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mDrawerLayout.isDrawerOpen(mDrawerList)){
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }
+        else{
+            super.onBackPressed();
+        }
+    }
+
+    protected void showAbout() {
+        View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+
+        TextView textView = (TextView) messageView.findViewById(R.id.about_credits);
+        int defaultColor = textView.getTextColors().getDefaultColor();
+        textView.setTextColor(defaultColor);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.ic_add_location_black_36dp);
+        builder.setTitle(R.string.app_name);
+        builder.setView(messageView);
+        builder.create();
+        builder.show();
     }
 
     @Override
