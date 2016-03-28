@@ -1,9 +1,13 @@
 package xsoft.com.rucal;
 
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,8 +31,12 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -147,6 +155,8 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
         lugar.setOnMarkerClickListener(this);
         lugar.setOnMarkerDragListener(this);
         crearMarker(lugar, new GeoPoint(5.508006, -73.37202), "Lugar", getResources().getDrawable(R.drawable.ic_add_location_black_36dp));
+
+        obtenerAlertas();
 
         return v;
     }
@@ -279,6 +289,104 @@ public class AlertaFragment extends Fragment implements MapEventsReceiver, Marke
                 }
             }
         }.execute();
+    }
+
+    public void obtenerAlertas(){
+        new AsyncTask<Void, Void, Void>() {
+            InputStream is = null;
+            String json = "";
+            JSONArray jObj = null;
+
+            ProgressDialog dialog;
+
+            @Override
+            protected void onPreExecute() {
+                dialog = ProgressDialog.show(getActivity(), "","Cargando alertas...", true);
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                HttpGet get=new HttpGet(Commons.SERVER_IP+"/alertas");
+                HttpParams httpParameters = new BasicHttpParams();
+                HttpResponse httpResponse = null;
+                int timeoutConnection = 4000;
+                HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+                int timeoutSocket = 6000;
+                HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+                DefaultHttpClient httpClient = new DefaultHttpClient(httpParameters);
+                try {
+                    httpResponse = httpClient.execute(get);
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    is = httpEntity.getContent();
+                } catch (ConnectTimeoutException e) {
+                    dialog.dismiss();
+                    Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Alertas)", Toast.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                    StringBuilder sb = new StringBuilder();
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    is.close();
+                    json = sb.toString();
+                } catch (Exception e) {
+                    Log.e("Buffer Error", "Error converting result " + e.toString());
+                }
+                try {
+                    Log.e("Resultado", json);
+                    jObj = new JSONArray(json);
+                    for (int i=0; i<jObj.length(); i++) {
+                        JSONObject nodo = new JSONObject(jObj.getJSONArray(i).getString(0));
+                        double lat=(double)nodo.getJSONArray("coordinates").get(1);
+                        double lon=(double)nodo.getJSONArray("coordinates").get(0);
+                        GeoPoint gPt=new GeoPoint(lat, lon);
+                        Marker marker=new Marker(map);
+                        int id=jObj.getJSONArray(i).getInt(3);
+                        marker.setPosition(gPt);
+                        marker.setTitle(jObj.getJSONArray(i).getString(2));
+                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                        int votos=jObj.getJSONArray(i).getInt(4);
+                        switch (jObj.getJSONArray(i).getString(1)){
+                            case "A":
+                                if(votos>=2)
+                                    marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.accidente), 90, 90, true)));
+                                else
+                                    marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.accidente_nv), 90, 90, true)));
+                                break;
+                            case "C":
+                                if(votos>=2)
+                                    marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.cierre), 90, 90, true)));
+                                else
+                                    marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.cierre_nv), 90, 90, true)));
+                                break;
+                            case "M":
+                                if(votos>=2)
+                                    marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.construccion), 90, 90, true)));
+                                else
+                                    marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.construccion_nv), 90, 90, true)));
+                                break;
+                        }
+                        CustomInfoWindow infowindow=new CustomInfoWindow(map, id);
+                        marker.setInfoWindow(infowindow);
+                        infowindow.setVotos(votos);
+                        map.getOverlays().add(marker);
+                    }
+                } catch (JSONException e) {
+                    Log.e("JSON Parser", "Error parsing data " + e.toString());
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                dialog.dismiss();
+            }
+        }.execute();
+        map.invalidate();
     }
 
     @Override

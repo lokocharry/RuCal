@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
@@ -54,6 +55,12 @@ public class CustomInfoWindow extends MarkerInfoWindow {
                 votar("/votarEventoDown/");
             }
         });
+
+    }
+
+    public void setVotos(int votos){
+        TextView txtVotos=(TextView)(mView.findViewById(R.id.bubble_votes));
+        txtVotos.setText("("+votos +" votos)");
     }
 
     @Override public void onOpen(Object item){

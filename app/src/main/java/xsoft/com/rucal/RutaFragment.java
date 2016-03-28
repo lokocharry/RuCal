@@ -222,7 +222,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         crearMarker(origen, new GeoPoint(5.508006, -73.37202), "Origen", getResources().getDrawable(R.drawable.ic_person_pin_circle_black_36dp));
         crearMarker(destino, new GeoPoint(5.576521, -73.338031), "Destino", getResources().getDrawable(R.drawable.ic_directions_run_black_36dp));
 
-        obtenerAlertas();
+        obtenerAlertasVerificadas();
         obtenerEstacionesDeServicio();
         map.invalidate();
 
@@ -316,7 +316,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         }.execute();
     }
 
-    public void obtenerAlertas(){
+    public void obtenerAlertasVerificadas(){
         new AsyncTask<Void, Void, Void>() {
             InputStream is = null;
             String json = "";
@@ -331,7 +331,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
 
             @Override
             protected Void doInBackground(Void... params) {
-                HttpGet get=new HttpGet(Commons.SERVER_IP+"/alertas");
+                HttpGet get=new HttpGet(Commons.SERVER_IP+"/alertasVerificadas");
                 HttpParams httpParameters = new BasicHttpParams();
                 HttpResponse httpResponse = null;
                 int timeoutConnection = 4000;
@@ -344,6 +344,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     HttpEntity httpEntity = httpResponse.getEntity();
                     is = httpEntity.getContent();
                 } catch (ConnectTimeoutException e) {
+                    dialog.dismiss();
                     Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Alertas)", Toast.LENGTH_LONG).show();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -370,7 +371,6 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                         GeoPoint gPt=new GeoPoint(lat, lon);
                         Marker marker=new Marker(map);
                         int id=jObj.getJSONArray(i).getInt(3);
-                        marker.setInfoWindow(new CustomInfoWindow(map, id));
                         marker.setPosition(gPt);
                         marker.setTitle(jObj.getJSONArray(i).getString(2));
                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -385,7 +385,10 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                                 marker.setIcon(new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.construccion), 90, 90, true)));
                                 break;
                         }
-                       poiMarkers.add(marker);
+                        CustomInfoWindow infowindow=new CustomInfoWindow(map, id);
+                        infowindow.setVotos(jObj.getJSONArray(i).getInt(4));
+                        marker.setInfoWindow(infowindow);
+                        poiMarkers.add(marker);
                     }
                 } catch (JSONException e) {
                     Log.e("JSON Parser", "Error parsing data " + e.toString());
@@ -429,6 +432,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     HttpEntity httpEntity = httpResponse.getEntity();
                     is = httpEntity.getContent();
                 } catch (ConnectTimeoutException e) {
+                    dialog.dismiss();
                     Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado", Toast.LENGTH_LONG).show();
                 } catch (IOException e) {
                     e.printStackTrace();
