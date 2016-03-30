@@ -61,6 +61,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -689,10 +690,13 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     JSONObject dir=new JSONObject(json);
                     Log.i("Direcciones", direcciones.toString());
                     ArrayList<NavItem> instrucciones = new ArrayList<NavItem>();
-                    for (int j=0; j<dir.length(); j++){
-                        String texto=dir.getString(String.valueOf(j));
-                        Log.i("Direcciones", texto);
-                        instrucciones.add(new NavItem(""+(j+1), texto, R.drawable.ic_more_black_24dp));
+                    Iterator<String> keys= dir.keys();
+                    int i=1;
+                    while (keys.hasNext()){
+                        String keyValue = (String)keys.next();
+                        String texto = dir.getString(keyValue);
+                        instrucciones.add(new NavItem(""+i, texto, R.drawable.ic_more_black_24dp));
+                        i++;
                     }
                     DrawerListAdapter adapter = new DrawerListAdapter(getActivity().getApplicationContext(), instrucciones);
                     actualizarDirecciones(adapter);
