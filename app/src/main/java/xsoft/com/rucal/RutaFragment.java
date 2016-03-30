@@ -662,7 +662,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                 parametros.add(new BasicNameValuePair("deslat", deslatlon[0]));
                 parametros.add(new BasicNameValuePair("deslon", deslatlon[1]));
 
-                HttpGet get=new HttpGet(Commons.SERVER_IP+"/obtenerDirecciones?"+parametrosAUrl(parametros));
+                HttpGet get=new HttpGet(Commons.SERVER_IP+"/obtenerDireccionesDeVerdad?"+parametrosAUrl(parametros));
                 Log.e("URL", Commons.SERVER_IP+"/rutas?"+parametrosAUrl(parametros));
                 HttpResponse httpResponse = null;
                 try {
