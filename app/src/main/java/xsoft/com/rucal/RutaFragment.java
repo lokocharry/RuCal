@@ -704,7 +704,7 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         }.execute();
     }
 
-    public void  actualizarDirecciones(final DrawerListAdapter adapter){
+    public void actualizarDirecciones(final DrawerListAdapter adapter){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
