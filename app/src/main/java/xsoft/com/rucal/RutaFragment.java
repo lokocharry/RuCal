@@ -537,6 +537,9 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                 try {
                     jObj = new JSONArray(json);
                     List<GeoPoint> puntosRuta=new ArrayList<GeoPoint>();
+                    distancia=0;
+                    velocidad=0;
+                    ivelocidad=0;
                     for (int i=0; i<jObj.length(); i++) {
                         JSONArray nodo = jObj.getJSONArray(i);
 
@@ -551,6 +554,9 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                             GeoPoint puntoRuta=new GeoPoint(lat, lon);
                             puntosRuta.add(puntoRuta);
                         }
+                        distancia+=nodo.getDouble(1);
+                        velocidad+=nodo.getDouble(2);
+                        ivelocidad++;
                     }
                     ruta.setPoints(puntosRuta);
                     map.getOverlays().add(ruta);
@@ -562,6 +568,10 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
             }
         }.execute();
     }
+
+    private double distancia;
+    private double velocidad;
+    private double ivelocidad;
 
     public void calcularRutaAlterna(){
         if(rutaAlt!=null){
@@ -698,6 +708,8 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                         instrucciones.add(new NavItem(""+i, texto, R.drawable.ic_more_black_24dp));
                         i++;
                     }
+                    String texto="Distancia: "+Math.round((distancia/1000))+" Km\nVelocidad media: "+Math.round((velocidad/ivelocidad))+" Km/H\nTiempo estimado: "+Math.round(((distancia/(velocidad/ivelocidad))*60/1000))+" minutos";
+                    instrucciones.add(0, new NavItem("Información del recorrido", texto, R.drawable.ic_directions_black_24dp));
                     DrawerListAdapter adapter = new DrawerListAdapter(getActivity().getApplicationContext(), instrucciones);
                     actualizarDirecciones(adapter);
                 } catch (JSONException e) {
@@ -812,7 +824,8 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
         intent.putExtra("lat", destino.getPosition().getLatitude());
         intent.putExtra("lon", destino.getPosition().getLongitude());
         intent.putExtra("locLat", obtenerMiUbicacion().getLatitude());
-        intent.putExtra("locLon", obtenerMiUbicacion().getLatitude());
+        intent.putExtra("locLon", obtenerMiUbicacion().getLongitude());
+        intent.putExtra("locAl", obtenerMiUbicacion().getAltitude());
         startActivity(intent);
     }
 

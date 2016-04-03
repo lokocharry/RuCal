@@ -33,10 +33,10 @@ public class ARView extends ActionBarActivity implements OnClickBeyondarObjectLi
 
         World world = new World(getApplicationContext());
         world.setDefaultImage(R.drawable.ic_my_location_black_36dp);
-        world.setGeoPosition(intent.getDoubleExtra("locLat", 0.0)-30, intent.getDoubleExtra("locLon", 0.0)-4);
+        world.setGeoPosition(intent.getDoubleExtra("locLat", 0.0)-30, intent.getDoubleExtra("locLon", 0.0)-4, intent.getDoubleExtra("locAl", 0.0));
         GeoObject go1 = new GeoObject();
-        go1.setGeoPosition(intent.getDoubleExtra("lat", 0.0)-30, intent.getDoubleExtra("lat", 0.0)-4);
-        go1.setImageResource(R.drawable.ic_directions_run_black_36dp);
+        go1.setGeoPosition(intent.getDoubleExtra("lat", 0.0)-30, intent.getDoubleExtra("lon", 0.0)-4, intent.getDoubleExtra("locAl", 0.0));
+        go1.setImageResource(R.drawable.accidente);
         go1.setName("Destino");
         world.addBeyondarObject(go1);
         mBeyondarFragment.setWorld(world);
