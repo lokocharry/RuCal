@@ -26,4 +26,44 @@
         android:autoLink="web"
         android:textColor="@android:color/black" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dip"
+        android:textSize="16sp"
+        android:text="OSMDroid"
+        android:autoLink="web"
+        android:textColor="@android:color/black"
+        android:drawableLeft="@drawable/omsdroid"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dip"
+        android:textSize="16sp"
+        android:text="OSMDroid BonusPack"
+        android:autoLink="web"
+        android:textColor="@android:color/black"
+        android:drawableLeft="@drawable/osmbonuspack"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dip"
+        android:textSize="16sp"
+        android:text="BeyondAR"
+        android:autoLink="web"
+        android:textColor="@android:color/black"
+        android:drawableLeft="@drawable/beyondar"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dip"
+        android:textSize="16sp"
+        android:text="Sliding Up Panel"
+        android:autoLink="web"
+        android:textColor="@android:color/black"
+        android:drawableLeft="@drawable/slidingup"/>
+
 </LinearLayout>

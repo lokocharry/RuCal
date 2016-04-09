@@ -346,7 +346,11 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     is = httpEntity.getContent();
                 } catch (ConnectTimeoutException e) {
                     dialog.dismiss();
-                    Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Alertas)", Toast.LENGTH_LONG).show();
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Alertas)", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -434,7 +438,11 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     is = httpEntity.getContent();
                 } catch (ConnectTimeoutException e) {
                     dialog.dismiss();
-                    Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado", Toast.LENGTH_LONG).show();
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Estaciones)", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -517,7 +525,11 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     HttpEntity httpEntity = httpResponse.getEntity();
                     is = httpEntity.getContent();
                 } catch (ConnectTimeoutException e) {
-                    Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado", Toast.LENGTH_LONG).show();
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Ruta)", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -680,7 +692,14 @@ public class RutaFragment extends Fragment implements MapEventsReceiver, Marker.
                     httpResponse = httpClient.execute(get);
                     HttpEntity httpEntity = httpResponse.getEntity();
                     is = httpEntity.getContent();
-                } catch (IOException e) {
+                } catch (ConnectTimeoutException e) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(), "Tiempo de respuesta agotado (Direcciones)", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
                 try {

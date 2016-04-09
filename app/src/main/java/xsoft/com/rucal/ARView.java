@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.beyondar.android.fragment.BeyondarFragmentSupport;
 import com.beyondar.android.plugin.radar.RadarView;
 import com.beyondar.android.plugin.radar.RadarWorldPlugin;
+import com.beyondar.android.util.math.Distance;
 import com.beyondar.android.view.OnClickBeyondarObjectListener;
 import com.beyondar.android.world.BeyondarObject;
 import com.beyondar.android.world.GeoObject;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 public class ARView extends ActionBarActivity implements OnClickBeyondarObjectListener {
 
     private BeyondarFragmentSupport mBeyondarFragment;
+    private GeoObject go1;
+    private GeoObject go2;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,16 +31,20 @@ public class ARView extends ActionBarActivity implements OnClickBeyondarObjectLi
         setContentView(R.layout.fragment_ar);
         mBeyondarFragment = (BeyondarFragmentSupport) getSupportFragmentManager().findFragmentById(R.id.beyondarFragment);
         mBeyondarFragment.setOnClickBeyondarObjectListener(this);
+        mBeyondarFragment.setPullCloserDistance(10000);
 
         Intent intent=getIntent();
 
         World world = new World(getApplicationContext());
         world.setDefaultImage(R.drawable.ic_my_location_black_36dp);
-        world.setGeoPosition(intent.getDoubleExtra("locLat", 0.0)-30, intent.getDoubleExtra("locLon", 0.0)-4, intent.getDoubleExtra("locAl", 0.0));
-        GeoObject go1 = new GeoObject();
-        go1.setGeoPosition(intent.getDoubleExtra("lat", 0.0)-30, intent.getDoubleExtra("lon", 0.0)-4, intent.getDoubleExtra("locAl", 0.0));
-        go1.setImageResource(R.drawable.accidente);
+        world.setGeoPosition(intent.getDoubleExtra("locLat", 0.0), intent.getDoubleExtra("locLon", 0.0), intent.getDoubleExtra("locAl", 0.0));
+        go1 = new GeoObject();
+        go1.setGeoPosition(intent.getDoubleExtra("lat", 0.0), intent.getDoubleExtra("lon", 0.0), intent.getDoubleExtra("locAl", 0.0));
+        go1.setImageResource(R.drawable.ic_add_location_black_36dp);
         go1.setName("Destino");
+
+        go2 = new GeoObject();
+        go2.setGeoPosition(intent.getDoubleExtra("locLat", 0.0), intent.getDoubleExtra("locLon", 0.0), intent.getDoubleExtra("locAl", 0.0));
         world.addBeyondarObject(go1);
         mBeyondarFragment.setWorld(world);
 
@@ -55,6 +62,6 @@ public class ARView extends ActionBarActivity implements OnClickBeyondarObjectLi
 
     @Override
     public void onClickBeyondarObject(ArrayList<BeyondarObject> arrayList) {
-        Toast.makeText(this, arrayList.get(0).getName(), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, arrayList.get(0).getName()+" a :"+ Math.round(Distance.calculateDistanceMeters(go1, go2))+" metros", Toast.LENGTH_LONG).show();
     }
 }
